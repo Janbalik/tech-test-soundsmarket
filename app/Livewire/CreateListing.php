@@ -8,7 +8,6 @@ use Livewire\WithFileUploads;
 
 class CreateListing extends Component
 {
-
     use WithFileUploads;
 
     public string $title = '';

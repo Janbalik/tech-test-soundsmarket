@@ -1,22 +1,23 @@
 <?php
 
 use App\Livewire\CreateListing;
-use App\Models\User;  
+use App\Models\User;
 use App\Models\Listing;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+
 use function Pest\Laravel\get;
 use function Pest\Laravel\actingAs;
 
 // Protected route
-it('redirects unauthenticated users to login', function() {
+it('redirects unauthenticated users to login', function () {
     get(route('listings.create'))
-        ->assertRedirect(route('login')); 
+        ->assertRedirect(route('login'));
 });
 
 // Mount component
-it('renders the create listing compoment', function() {
+it('renders the create listing compoment', function () {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -31,12 +32,12 @@ it('requires title, description, price and category', function () {
 
     Livewire::actingAs($user)
         ->test(CreateListing::class)
-        ->set('title', '') 
+        ->set('title', '')
         ->set('description', '')
-        ->set('price', '') 
+        ->set('price', '')
         ->set('category_id', null)
-        ->call('save') 
-        ->assertHasErrors([ 
+        ->call('save')
+        ->assertHasErrors([
             'title' => 'required',
             'description' => 'required',
         ])
@@ -56,7 +57,7 @@ it('requires price to be positive', function () {
 
 it('accepts valid decimal price format', function () {
     $user = User::factory()->create();
-   
+
     $this->seed(\Database\Seeders\CategorySeeder::class);
 
     $category = \App\Models\Category::firstOrFail();
@@ -65,7 +66,7 @@ it('accepts valid decimal price format', function () {
         ->test(CreateListing::class)
         ->set('title', 'Test')
         ->set('description', 'Desc')
-        ->set('category_id', $category->id) 
+        ->set('category_id', $category->id)
         ->set('price', 1200.50)
         ->call('save')
         ->assertHasNoErrors(['price']);
@@ -73,9 +74,9 @@ it('accepts valid decimal price format', function () {
 
 // Create listing and upload images
 it('can upload images and create listing', function () {
-    Storage::fake('public'); 
+    Storage::fake('public');
     $user = User::factory()->create();
-    
+
     $this->seed(\Database\Seeders\CategorySeeder::class);
     $category = \App\Models\Category::firstOrFail();
 
@@ -96,13 +97,13 @@ it('can upload images and create listing', function () {
     expect($listing->title)->toBe('Fender Stratocaster');
 
     expect($listing->getMedia('images'))->toHaveCount(1);
-    
+
     $mediaItem = $listing->getFirstMedia('images');
     Storage::disk('public')->assertExists($mediaItem->getPathRelativeToRoot());
 });
 
 
-// No images 
+// No images
 it('requires at least one image', function () {
     Storage::fake('public');
     $user = User::factory()->create();
@@ -125,7 +126,7 @@ it('requires at least one image', function () {
 
 
 // File is not an image
-it('rejects non image files', function() { 
+it('rejects non image files', function () {
 
     Storage::fake('public');
     $user = User::factory()->create();
@@ -150,15 +151,15 @@ it('rejects non image files', function() {
 });
 
 
-// Image oversized 
-it('rejects too large images', function() {
+// Image oversized
+it('rejects too large images', function () {
     Storage::fake('public');
     $user = User::factory()->create();
 
     $this->seed(\Database\Seeders\CategorySeeder::class);
     $category = \App\Models\Category::firstOrFail();
 
-    $bigImage = UploadedFile::fake()->image('big.jpg')->size(3_000); 
+    $bigImage = UploadedFile::fake()->image('big.jpg')->size(3_000);
 
     Livewire::actingAs($user)
         ->test(CreateListing::class)
@@ -179,10 +180,10 @@ it('shows validation errors in the create listing view', function () {
 
     Livewire::actingAs($user)
         ->test(CreateListing::class)
-        ->set('title', '') 
-        ->set('description', '') 
-        ->set('price', ) 
-        ->set('category_id', 0) 
+        ->set('title', '')
+        ->set('description', '')
+        ->set('price', )
+        ->set('category_id', 0)
         ->call('save')
         ->assertHasErrors(['title', 'description', 'price', 'category_id'])
         ->assertSee('El título es obligatorio')

@@ -6,8 +6,8 @@
 | Test Case Configuration
 |--------------------------------------------------------------------------
 |
-|  Extend from TestCase to all tests in Feature folder 
-|  and use lazy refresh for updating database 
+|  Extend from TestCase to all tests in Feature folder
+|  and use lazy refresh for updating database
 |
 */
 
