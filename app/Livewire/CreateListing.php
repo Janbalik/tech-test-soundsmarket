@@ -26,6 +26,26 @@ class CreateListing extends Component
         'images.*' => 'image|mimes:jpeg,jpg,png,webp|max:2048',
     ];
 
+    protected array $messages = [
+        'title.required' => 'El título es obligatorio',
+        'title.max' => 'El título no puede exceder 255 caracteres',
+        'description.required' => 'La descripción es obligatoria',
+        'description.max' => 'La descripción no puede exceder 2500 caracteres',
+        'price.required' => 'El precio es obligatorio',
+        'price.numeric' => 'El precio debe ser un número válido',
+        'price.min' => 'El precio debe ser mayor que 0',
+        'category_id.required' => 'Selecciona una categoría válida',
+        'category_id.min' => 'Selecciona una categoría válida',
+        'category_id.exists' => 'La categoría seleccionada no existe',
+        'images.required' => 'Sube al menos una imagen',
+        'images.min' => 'Sube al menos una imagen',
+        'images.max' => 'Puedes subir máximo 10 imágenes',
+        'images.array' => 'Las imágenes deben ser archivos válidos',
+        'images.*.image' => 'Algunos archivos no son imágenes válidas. Solo se aceptan PNG, JPG, JPEG y WebP',
+        'images.*.mimes' => 'Solo se aceptan imágenes en formato PNG, JPG, JPEG o Webp',
+        'images.*.max' => 'Algunas imágenes superan el tamaño máximo de 2MB',
+    ];
+
     public function save(): void
     {
         $this->validate();
@@ -41,6 +61,7 @@ class CreateListing extends Component
         foreach ($this->images as $image) {
             $listing->addMedia($image)->toMediaCollection('images');
         }
+        session()->flash('success', '¡Producto subido!');
     }
 
     public function render()

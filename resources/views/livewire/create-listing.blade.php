@@ -124,5 +124,12 @@
                 <span wire:loading>Guardando...</span>
             </flux:button>
         </div>
+
+        @if(session('success'))
+            <div class="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-200 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                {{ session('success') }}
+            </div>
+        @endif
+        
     </form>
 </div>
