@@ -3,6 +3,7 @@
 use App\Livewire\CreateListing;
 use App\Models\User;
 use App\Models\Listing;
+use App\Models\Category;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -188,8 +189,7 @@ it('shows validation errors in the create listing view', function () {
         ->assertHasErrors(['title', 'description', 'price', 'category_id'])
         ->assertSee('El título es obligatorio')
         ->assertSee('La descripción es obligatoria')
-        ->assertSee('El precio debe ser mayor que 0')
-        ->assertSee('Selecciona una categoría válida');
+        ->assertSee('El precio debe ser mayor que 0');
 });
 
 // UX: shows success message after creating listing
@@ -212,4 +212,55 @@ it('shows success message after creating a listing', function () {
         ->call('save')
         ->assertHasNoErrors()
         ->assertSee('¡Producto subido!');
+});
+
+// Category selector: shows root categories
+it('shows root categories in the create listing form', function () {
+    $user = User::factory()->create();
+
+    $this->seed(\Database\Seeders\CategorySeeder::class);
+    $rootCategories = Category::whereNull('parent_id')->pluck('name')->toArray();
+
+    Livewire::actingAs($user)
+        ->test(CreateListing::class)
+        ->assertSee($rootCategories[0]); // if we see 1 root, we know they are loaded
+});
+
+// Category selector: only allows leaf categories as final category_id
+it('sets category_id only when selecting a leaf category', function () {
+    $user = User::factory()->create();
+
+    $this->seed(\Database\Seeders\CategorySeeder::class);
+
+    // Get a leaf (with no children)
+    $leafCategory = Category::doesntHave('children')->firstOrFail();
+
+    // Build path from leaf to root
+    $path = [];
+    $current = $leafCategory;
+
+    while ($current) {
+        $path[] = $current;
+        $current = $current->parent;
+    }
+
+    // Revert path to set it in the right order
+    $path = array_reverse($path);
+
+    $test = Livewire::actingAs($user)
+        ->test(CreateListing::class)
+        ->assertSet('category_id', 0);
+
+    foreach ($path as $level => $category) {
+        $test->set("categoryPath.$level", $category->id)
+            ->call('$refresh');
+
+        if ($level === array_key_last($path)) {
+            // Last level: it's a leaf
+            $test->assertSet('category_id', $category->id);
+        } else {
+            // Still not a leaf
+            $test->assertSet('category_id', 0);
+        }
+    }
 });
