@@ -100,3 +100,75 @@ it('can upload images and create listing', function () {
     $mediaItem = $listing->getFirstMedia('images');
     Storage::disk('public')->assertExists($mediaItem->getPathRelativeToRoot());
 });
+
+
+// No images 
+it('requires at least one image', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    $this->seed(\Database\Seeders\CategorySeeder::class);
+    $category = \App\Models\Category::firstOrFail();
+
+    Livewire::actingAs($user)
+        ->test(CreateListing::class)
+        ->set('title', 'Test sin imágenes')
+        ->set('description', 'Desc')
+        ->set('price', 200.00)
+        ->set('category_id', $category->id)
+        ->set('images', [])
+        ->call('save')
+        ->assertHasErrors([
+            'images' => 'required',
+        ]);
+});
+
+
+// File is not an image
+it('reject non image files', function() { 
+
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    $this->seed(\Database\Seeders\CategorySeeder::class);
+    $category = \App\Models\Category::firstOrFail();
+
+    $fakeFile = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
+
+    Livewire::actingAs($user)
+        ->test(CreateListing::class)
+        ->set('title', 'Test archivo inválido')
+        ->set('description', 'Desc')
+        ->set('price', 200.00)
+        ->set('category_id', $category->id)
+        ->set('images', [$fakeFile])
+        ->call('save')
+        ->assertHasErrors([
+            'images.0' => 'image',
+        ]);
+
+});
+
+
+// Image oversized 
+it('rejects too large images', function() {
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    $this->seed(\Database\Seeders\CategorySeeder::class);
+    $category = \App\Models\Category::firstOrFail();
+
+    $bigImage = UploadedFile::fake()->image('big.jpg')->size(3_000); 
+
+    Livewire::actingAs($user)
+        ->test(CreateListing::class)
+        ->set('title', 'Test imagen grande')
+        ->set('description', 'Desc')
+        ->set('price', 200.00)
+        ->set('category_id', $category->id)
+        ->set('images', [$bigImage])
+        ->call('save')
+        ->assertHasErrors([
+            'images.0' => 'max',
+        ]);
+});
