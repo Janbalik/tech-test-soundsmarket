@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Listing;
+use App\Models\Category;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -14,6 +15,7 @@ class CreateListing extends Component
     public string $description = '';
     public float $price = 0.0;
     public int $category_id = 0;
+    public array $categoryPath = [];
     public array $images = [];
 
     protected array $rules = [
@@ -38,12 +40,41 @@ class CreateListing extends Component
         'category_id.exists' => 'La categoría seleccionada no existe',
         'images.required' => 'Sube al menos una imagen',
         'images.min' => 'Sube al menos una imagen',
-        'images.max' => 'Puedes subir máximo 10 imágenes',
+        'images.max' => 'Puedes subir máximo 6 imágenes',
         'images.array' => 'Las imágenes deben ser archivos válidos',
         'images.*.image' => 'Algunos archivos no son imágenes válidas. Solo se aceptan PNG, JPG, JPEG y WebP',
         'images.*.mimes' => 'Solo se aceptan imágenes en formato PNG, JPG, JPEG o Webp',
         'images.*.max' => 'Algunas imágenes superan el tamaño máximo de 2MB',
     ];
+
+    public function updatedCategoryPath($value, $key): void
+    {
+        $level = (int) $key;
+    
+        // Truncate array to remove lower levels
+        $this->categoryPath = array_slice($this->categoryPath, 0, $level + 1);
+        // Set as category if it is the last level 
+        $selectedCategoryId = $this->categoryPath[$level] ?? 0;
+    
+        if ($selectedCategoryId) {
+            $category = Category::with('children')->find($selectedCategoryId);
+            
+            if ($category && $category->children->isEmpty()) {
+                // Last level: set category
+                $this->category_id = $selectedCategoryId;
+                $this->resetErrorBag(['category_id']);
+                $this->validateOnly('category_id');
+            } else {
+                // Still not last level
+                $this->category_id = 0;
+                $this->resetErrorBag(['category_id']);
+            }
+        } else {
+            $this->category_id = 0;
+            $this->resetErrorBag(['category_id']);
+        }
+    }
+
 
     public function save(): void
     {
@@ -65,6 +96,23 @@ class CreateListing extends Component
 
     public function render()
     {
-        return view('livewire.create-listing');
+        $rootCategories = Category::whereNull('parent_id')
+            ->with('children')
+            ->get();
+
+        $categoriesByLevel = [];
+
+        for ($level = 0; $level < count($this->categoryPath); $level++) {
+            $parentId = $this->categoryPath[$level];
+
+            $categoriesByLevel[$level] = Category::where('parent_id', $parentId)
+                ->with('children')
+                ->get();
+        }
+
+        return view('livewire.create-listing', [
+            'rootCategories' => $rootCategories,
+            'categoriesByLevel' => $categoriesByLevel,
+        ]);
     }
 }

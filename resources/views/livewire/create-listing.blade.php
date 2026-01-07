@@ -65,23 +65,59 @@
             @enderror
         </div>
 
-        {{-- Categoría --}}
+        {{-- Categoría jerárquica --}}
         <div>
-            <label for="category_id" class="block text-sm font-medium mb-2">ID de categoría</label>
-            <input
-                type="number"
-                id="category_id"
-                wire:model.live="category_id"
-                required
-                min="1"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                       dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500
-                       focus:border-transparent @error('category_id') border-red-500 @enderror"
-                placeholder="Ej: 1"
-            />
-            @error('category_id')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
+            <h2 class="text-xl font-semibold mb-4">Categoría</h2>
+
+            @if($rootCategories->count())
+                {{-- Primer nivel --}}
+                <div>
+                    <label for="category_0" class="block text-sm font-medium mb-3">Selecciona una categoría</label>
+                    <select
+                        id="category_0"
+                        wire:model.live="categoryPath.0"
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                            dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500
+                            focus:border-transparent"
+                    >
+                        <option value="0">-- Selecciona una categoría --</option>
+                        @foreach($rootCategories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Niveles dinámicos --}}
+                @foreach($categoriesByLevel as $level => $categories)
+                    @if($categories->count())
+                        <div>
+                            <label for="category_{{ $level + 1 }}" class="block text-sm font-medium mt-3 mb-3">
+                                Selecciona una subcategoría (Nivel {{ $level + 2 }})
+                            </label>
+                            <select
+                                id="category_{{ $level + 1 }}"
+                                wire:model.live="categoryPath.{{ $level + 1 }}"
+                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                                    dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500
+                                    focus:border-transparent"
+                            >
+                                <option value="0">-- Selecciona una opción --</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+                @endforeach
+
+                @error('category_id')
+                    <div class="mt-4 text-red-500 text-sm">
+                        {{ $message }}
+                    </div>
+                @enderror
+            @else
+                <p class="text-gray-500">No hay categorías disponibles</p>
+            @endif
         </div>
 
         {{-- Imágenes --}}
