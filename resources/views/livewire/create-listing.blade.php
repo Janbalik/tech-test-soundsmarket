@@ -65,7 +65,7 @@
             @enderror
         </div>
 
-        {{-- Categoría (de momento, simple input numérico) --}}
+        {{-- Categoría --}}
         <div>
             <label for="category_id" class="block text-sm font-medium mb-2">ID de categoría</label>
             <input
@@ -81,6 +81,27 @@
             />
             @error('category_id')
                 <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+
+        {{-- Imágenes --}}
+        <div>
+            <label for="images" class="block text-sm font-medium mb-2">Imágenes del producto</label>
+            <input
+                type="file"
+                id="images"
+                wire:model="images"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                multiple
+                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg
+                       cursor-pointer bg-gray-50 dark:bg-gray-700 dark:border-gray-600
+                       dark:placeholder-gray-400 focus:outline-none"
+            />
+            @error('images')
+                <div class="mt-2 text-red-500 text-sm">{{ $message }}</div>
+            @enderror
+            @error('images.*')
+                <div class="mt-2 text-red-500 text-sm">{{ $message }}</div>
             @enderror
         </div>
 
