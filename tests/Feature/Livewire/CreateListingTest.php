@@ -125,7 +125,7 @@ it('requires at least one image', function () {
 
 
 // File is not an image
-it('reject non image files', function() { 
+it('rejects non image files', function() { 
 
     Storage::fake('public');
     $user = User::factory()->create();
@@ -171,4 +171,44 @@ it('rejects too large images', function() {
         ->assertHasErrors([
             'images.0' => 'max',
         ]);
+});
+
+// UX: shows validation errors in the view
+it('shows validation errors in the create listing view', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(CreateListing::class)
+        ->set('title', '') 
+        ->set('description', '') 
+        ->set('price', ) 
+        ->set('category_id', 0) 
+        ->call('save')
+        ->assertHasErrors(['title', 'description', 'price', 'category_id'])
+        ->assertSee('El título es obligatorio')
+        ->assertSee('La descripción es obligatoria')
+        ->assertSee('El precio debe ser mayor que 0')
+        ->assertSee('Selecciona una categoría válida');
+});
+
+// UX: shows success message after creating listing
+it('shows success message after creating a listing', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    $this->seed(\Database\Seeders\CategorySeeder::class);
+    $category = \App\Models\Category::firstOrFail();
+
+    $file = UploadedFile::fake()->image('guitar.jpg');
+
+    Livewire::actingAs($user)
+        ->test(CreateListing::class)
+        ->set('title', 'Fender Stratocaster')
+        ->set('description', 'Guitarra en buen estado')
+        ->set('price', 1200.50)
+        ->set('category_id', $category->id)
+        ->set('images', [$file])
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertSee('¡Producto subido!');
 });
