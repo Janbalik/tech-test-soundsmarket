@@ -144,10 +144,13 @@ it('rejects non image files', function () {
         ->set('price', 200.00)
         ->set('category_id', $category->id)
         ->set('images', [$fakeFile])
-        ->call('save')
-        ->assertHasErrors([
-            'images.0' => 'image',
-        ]);
+        ->call('$refresh')
+        // Invalid file now is not in images
+        ->assertSet('images', function ($images) {
+            return count($images) === 0;
+        })
+        // It is marked as not valid in invalidFiles
+        ->assertSet('invalidFiles.0', 'document.pdf');
 
 });
 
@@ -263,4 +266,74 @@ it('sets category_id only when selecting a leaf category', function () {
             $test->assertSet('category_id', 0);
         }
     }
+});
+
+
+// Images UX: previews are displayed
+it('shows image previews when uploading multiple images', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(CreateListing::class)
+        ->set('images', [
+            UploadedFile::fake()->image('first.jpg'),
+            UploadedFile::fake()->image('second.jpg'),
+            UploadedFile::fake()->image('third.jpg'),
+        ])
+        ->call('$refresh')
+        // Dependiendo de tu Blade, puedes comprobar por nombre de archivo
+        // o por un texto que solo aparezca si hay imágenes.
+        ->assertSee('1')
+        ->assertSee('2')
+        ->assertSee('3');
+});
+
+// Images UX: removeImage() removes an image and it despears
+it('removes an image from the preview when calling removeImage', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    $component = Livewire::actingAs($user)
+        ->test(CreateListing::class)
+        ->set('images', [
+            UploadedFile::fake()->image('keep.jpg'),
+            UploadedFile::fake()->image('remove-me.jpg'),
+        ]);
+
+    // Ensure we have 2 images
+    $component
+        ->call('$refresh')
+        ->assertSet('images', function ($images) {
+            return count($images) === 2;
+        });
+
+    // Remove the second one and ensure we have only one
+    $component
+        ->call('removeImage', 1)
+        ->assertSet('images', function ($images) {
+            return count($images) === 1;
+        });
+});
+
+// Images UX: invalidFiles shows not allowed file when it isn't an image
+it('tracks invalid files and shows a warning when non-image files are uploaded', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    $image = UploadedFile::fake()->image('valid.jpg');
+    $pdf   = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
+
+    Livewire::actingAs($user)
+        ->test(CreateListing::class)
+        ->set('images', [$image, $pdf])
+        ->call('$refresh')
+        // Only images are in the array
+        ->assertSet('images', function ($images) {
+            return count($images) === 1
+                && $images[0]->getClientOriginalName() === 'valid.jpg';
+        })
+        ->assertSet('invalidFiles.0', 'document.pdf')
+        // Message displayed
+        ->assertSee('Algunos archivos no son imágenes válidas');
 });
