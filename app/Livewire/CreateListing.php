@@ -17,6 +17,7 @@ class CreateListing extends Component
     public int $category_id = 0;
     public array $categoryPath = [];
     public array $images = [];
+    public array $invalidFiles = [];
 
     protected array $rules = [
         'title' => 'required|string|max:255',
@@ -47,18 +48,30 @@ class CreateListing extends Component
         'images.*.max' => 'Algunas imágenes superan el tamaño máximo de 2MB',
     ];
 
+    public function mount(): void
+    {
+        $this->title = '';
+        $this->description = '';
+        $this->price = 0.0;
+        $this->category_id = 0;
+        $this->categoryPath = [];
+        $this->images = [];
+        $this->invalidFiles = [];
+        $this->resetErrorBag();
+    }
+
     public function updatedCategoryPath($value, $key): void
     {
         $level = (int) $key;
-    
+
         // Truncate array to remove lower levels
         $this->categoryPath = array_slice($this->categoryPath, 0, $level + 1);
-        // Set as category if it is the last level 
+        // Set as category if it is the last level
         $selectedCategoryId = $this->categoryPath[$level] ?? 0;
-    
+
         if ($selectedCategoryId) {
             $category = Category::with('children')->find($selectedCategoryId);
-            
+
             if ($category && $category->children->isEmpty()) {
                 // Last level: set category
                 $this->category_id = $selectedCategoryId;
@@ -75,6 +88,49 @@ class CreateListing extends Component
         }
     }
 
+    public function updatedImages(): void
+    {
+        $this->invalidFiles = [];
+        $validImages = [];
+
+        foreach ($this->images as $image) {
+            if (! $image instanceof \Illuminate\Http\UploadedFile) {
+                continue;
+            }
+            $ext = strtolower($image->getClientOriginalExtension());
+
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                $validImages[] = $image;
+            } else {
+                $this->invalidFiles[] = $image->getClientOriginalName();
+            }
+        }
+
+        // Get  only images
+        $this->images = $validImages;
+        $this->resetErrorBag(['images', 'images.*']);
+
+        // Validate only images
+        try {
+            $this->validateOnly('images');
+        } catch (\Throwable $e) {
+            // Ignore
+        }
+    }
+
+    public function removeImage(int $index): void
+    {
+        unset($this->images[$index]);
+
+        $this->images = array_values($this->images);
+        $this->resetErrorBag(['images', 'images.*']);
+
+        try {
+            $this->validateOnly('images');
+        } catch (\Exception $e) {
+            // Ignore
+        }
+    }
 
     public function save(): void
     {
@@ -91,6 +147,8 @@ class CreateListing extends Component
         foreach ($this->images as $image) {
             $listing->addMedia($image)->toMediaCollection('images');
         }
+        $this->reset();
+        $this->resetErrorBag(['images', 'images.*']);
         session()->flash('success', '¡Producto subido!');
     }
 
