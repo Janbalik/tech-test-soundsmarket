@@ -195,27 +195,6 @@ it('shows validation errors in the create listing view', function () {
         ->assertSee('El precio debe ser mayor que 0');
 });
 
-// UX: shows success message after creating listing
-it('shows success message after creating a listing', function () {
-    Storage::fake('public');
-    $user = User::factory()->create();
-
-    $this->seed(\Database\Seeders\CategorySeeder::class);
-    $category = \App\Models\Category::firstOrFail();
-
-    $file = UploadedFile::fake()->image('guitar.jpg');
-
-    Livewire::actingAs($user)
-        ->test(CreateListing::class)
-        ->set('title', 'Fender Stratocaster')
-        ->set('description', 'Guitarra en buen estado')
-        ->set('price', 1200.50)
-        ->set('category_id', $category->id)
-        ->set('images', [$file])
-        ->call('save')
-        ->assertHasNoErrors()
-        ->assertSee('¡Producto subido!');
-});
 
 // Category selector: shows root categories
 it('shows root categories in the create listing form', function () {

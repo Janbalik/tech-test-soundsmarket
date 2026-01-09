@@ -29,7 +29,7 @@ it('shows listings on browse page', function () {
 
     $response->assertOk();
     $response->assertSee($listing->title);
-    $response->assertSee((string) $listing->price);
+    $response->assertSee(number_format($listing->price / 100, 2, ',', '.'));
     $response->assertSee($user->name);
 });
 

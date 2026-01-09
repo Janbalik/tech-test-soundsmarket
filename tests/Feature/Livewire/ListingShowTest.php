@@ -57,7 +57,7 @@ it('shows public listing details to unauthenticated users', function () {
     $listing = $user->listings()->create([
         'title' => 'Controladora DJ',
         'description' => 'Perfecto estado',
-        'price' => 199.90,
+        'price' => 19990,
         'category_id' => $leafCategory->id,
     ]);
 
@@ -65,7 +65,7 @@ it('shows public listing details to unauthenticated users', function () {
 
     $response->assertOk();
     $response->assertSee($listing->title);
-    $response->assertSee((string) $listing->price);
+    $response->assertSee(number_format($listing->price / 100, 2, ',', '.'));
     $response->assertSee($listing->description);
     $response->assertSee($user->name);
     $response->assertSee($listing->category->name);
