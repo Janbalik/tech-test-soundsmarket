@@ -15,14 +15,22 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->withoutTwoFactor()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        // Seed categories
-        $this->call([
-            CategorySeeder::class,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'test2@example.com'],
+            [
+                'name' => 'Test User2',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }
