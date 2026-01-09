@@ -7,19 +7,19 @@ use App\Livewire\Settings\TwoFactor;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Livewire\CreateListing;
-use App\Livewire\ListingShow;
-use App\Livewire\ListingIndex;
+use App\Livewire\ListingsIndex;
 use App\Livewire\ListingsBrowse;
-
 
 Route::get('/', ListingsBrowse::class)->name('home');
 
-Route::view('dashboard', 'dashboard')
+// When login, redirect to index instead of Laravel Dashboard to avoid modifing project structure
+Route::get('dashboard', fn () => redirect()->route('listings.index'))
     ->middleware(['auth', 'verified'])
-    ->name('dashboard');  
+    ->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('listings/create', CreateListing::class)->name('listings.create');
+    Route::get('listings', ListingsIndex::class)->name('listings.index');
 });
 
 Route::middleware(['auth'])->group(function () {
