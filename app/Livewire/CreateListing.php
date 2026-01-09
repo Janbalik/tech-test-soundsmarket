@@ -7,11 +7,13 @@ use App\Models\Category;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Traits\ListingValidationMessages;
+use App\Traits\RealTimeValidationCleaning;
 
 class CreateListing extends Component
 {
     use WithFileUploads;
     use ListingValidationMessages;
+    use RealTimeValidationCleaning;
 
     public string $title = '';
     public string $description = '';
@@ -48,6 +50,25 @@ class CreateListing extends Component
     public function messages(): array
     {
         return $this->getListingValidationMessages();
+    }
+
+    // Real time messages clearing
+    public function updatedTitle($value)
+    {
+        $this->resetErrorBag(['title']);
+        $this->validateOnly('title');
+    }
+
+    public function updatedDescription($value)
+    {
+        $this->resetErrorBag(['description']);
+        $this->validateOnly('description');
+    }
+
+    public function updatedPrice($value)
+    {
+        $this->resetErrorBag(['price']);
+        $this->validateOnly('price');
     }
 
     public function updatedCategoryPath($value, $key): void

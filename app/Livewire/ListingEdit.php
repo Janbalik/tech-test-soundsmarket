@@ -7,11 +7,13 @@ use Livewire\WithFileUploads;
 use App\Models\Listing;
 use App\Models\Category;
 use App\Traits\ListingValidationMessages;
+use App\Traits\RealTimeValidationCleaning;
 
 class ListingEdit extends Component
 {
     use WithFileUploads;
     use ListingValidationMessages;
+    use RealTimeValidationCleaning;
 
     public Listing $listing;
     public string $title = '';
@@ -21,6 +23,13 @@ class ListingEdit extends Component
     public array $categoryPath = [];
     public array $newImages = [];
     public $existingImages;
+
+    protected array $rules = [
+        'title' => 'required|string|max:255',
+        'description' => 'required|string|max:2500',
+        'price' => 'required|numeric|min:0.01',
+        'category_id' => 'required|integer|min:1|exists:categories,id',
+    ];
 
     public function mount(Listing $listing)
     {
@@ -62,11 +71,14 @@ class ListingEdit extends Component
             $category = Category::find($selectedCategoryId);
             if ($category && $category->children->isEmpty()) {
                 $this->category_id = $selectedCategoryId;
+                $this->clearAndValidateField('category_id');
             } else {
                 $this->category_id = 0;
+                $this->resetErrorBag(['category_id']);
             }
         } else {
             $this->category_id = 0;
+            $this->resetErrorBag(['category_id']);
         }
     }
 
