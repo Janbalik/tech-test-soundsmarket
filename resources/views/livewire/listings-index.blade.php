@@ -19,7 +19,7 @@
         @if ($listings->count())
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($listings as $listing)
-                    <div class="group block">
+                    <a href="{{ route('listing.show', $listing) }}" class="group block" wire:navigate>
                         <div
                             class="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden h-full flex flex-col">
                             <!-- Image -->
@@ -67,7 +67,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 @endforeach
             </div>
 

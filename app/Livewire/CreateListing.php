@@ -147,10 +147,10 @@ class CreateListing extends Component
         foreach ($this->images as $image) {
             $listing->addMedia($image)->toMediaCollection('images');
         }
-        $this->reset();
+        $this->reset('title', 'description', 'price', 'category_id', 'images');
         $this->resetErrorBag(['images', 'images.*']);
         session()->flash('success', '¡Producto subido!');
-        redirect()->route('home', $listing);
+        redirect()->route('listing.show', $listing);
     }
 
     public function render()

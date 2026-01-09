@@ -9,8 +9,10 @@ use Laravel\Fortify\Features;
 use App\Livewire\CreateListing;
 use App\Livewire\ListingsIndex;
 use App\Livewire\ListingsBrowse;
+use App\Livewire\ListingShow;
 
 Route::get('/', ListingsBrowse::class)->name('home');
+
 
 // When login, redirect to index instead of Laravel Dashboard to avoid modifing project structure
 Route::get('dashboard', fn () => redirect()->route('listings.index'))
@@ -20,7 +22,11 @@ Route::get('dashboard', fn () => redirect()->route('listings.index'))
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('listings/create', CreateListing::class)->name('listings.create');
     Route::get('listings', ListingsIndex::class)->name('listings.index');
+    // Placeholder for editing route
+    Route::get('/listings/{listing}/edit', fn () => abort(404))->name('listing.edit');
 });
+
+Route::get('/listings/{listing}', ListingShow::class)->name('listing.show');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
