@@ -7,14 +7,16 @@ use App\Livewire\Settings\TwoFactor;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Livewire\CreateListing;
+use App\Livewire\ListingShow;
+use App\Livewire\ListingIndex;
+use App\Livewire\ListingsBrowse;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+
+Route::get('/', ListingsBrowse::class)->name('home');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+    ->name('dashboard');  
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('listings/create', CreateListing::class)->name('listings.create');

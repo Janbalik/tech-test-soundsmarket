@@ -150,6 +150,7 @@ class CreateListing extends Component
         $this->reset();
         $this->resetErrorBag(['images', 'images.*']);
         session()->flash('success', '¡Producto subido!');
+        redirect()->route('home', $listing);
     }
 
     public function render()
