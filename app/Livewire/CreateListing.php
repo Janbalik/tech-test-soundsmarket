@@ -139,7 +139,7 @@ class CreateListing extends Component
         $listing = Listing::create([
             'title' => $this->title,
             'description' => $this->description,
-            'price' => $this->price,
+            'price' => (int)($this->price * 100),
             'category_id' => $this->category_id,
             'user_id' => auth()->id(),
         ]);

@@ -50,7 +50,7 @@
                                 </h3>
 
                                 <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 my-2">
-                                    {{ number_format($listing->price, 2, ',', '.') }}€
+                                    {{ number_format($listing->price / 100, 2, ',', '.') }}€
                                 </p>
 
                                 <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4">

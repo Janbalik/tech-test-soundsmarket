@@ -72,7 +72,7 @@
             <div>
                 <div class="mb-6">
                     <p class="text-4xl font-bold text-blue-600 dark:text-blue-400">
-                        {{ number_format($listing->price, 2, ',', '.') }}€
+                        {{ number_format($listing->price / 100, 2, ',', '.') }}€
                     </p>
                 </div>
 
