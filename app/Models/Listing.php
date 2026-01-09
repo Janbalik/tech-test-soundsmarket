@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Image\Enums\Fit;
 
 class Listing extends Model implements HasMedia
 {
@@ -58,5 +59,19 @@ class Listing extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('images');
+    }
+
+    /**
+     * Register conversions.
+     */
+    public function registerMediaConversions($media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->fit(Fit::Crop, 300, 300)
+            ->nonQueued();
+
+        $this->addMediaConversion('preview')
+            ->fit(Fit::Crop, 600, 600)
+            ->nonQueued();
     }
 }
