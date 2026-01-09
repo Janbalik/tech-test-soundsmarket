@@ -14,7 +14,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Images Section -->
             <div class="lg:col-span-2">
-                <div class="bg-gray-900 rounded-lg overflow-hidden">
+                <div class="bg-gray-900 rounded-lg shadow-md dark:shadow-xl hover:shadow-lg dark:hover:shadow-2xl overflow-hidden">
 
                     @if ($media->count())
                         <div class="relative aspect-square">

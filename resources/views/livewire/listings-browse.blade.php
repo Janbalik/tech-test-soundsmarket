@@ -32,7 +32,7 @@
                 @foreach ($listings as $listing)
                     <a href="{{ route('listing.show', $listing) }}" class="group block">
                         <div
-                            class="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden h-full flex flex-col">
+                            class="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-xl hover:shadow-lg dark:hover:shadow-2xl transition-shadow overflow-hidden h-full flex flex-col">
                             <!-- Image -->
                             <div class="relative bg-gray-200 dark:bg-gray-700 aspect-video overflow-hidden">
                                 @if ($listing->getFirstMedia('images'))
